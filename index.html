@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Walmart Sales Performance Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="hero">
+        <div>
+            <h1>Walmart Sales Performance Dashboard</h1>
+            <p>Weekly sales, store performance, holiday effects, and economic factors — 45 stores, 2010–2012.</p>
+        </div>
+    </header>
+
+    <section class="filters card">
+        <div class="filter-group"> <label for="storeFilter">Store</label> <select id="storeFilter"></select> </div>
+        <div class="filter-group"> <label for="holidayFilter">Week Type</label> <select id="holidayFilter"></select>
+        </div>
+        <div class="filter-group"> <label for="yearFilter">Year</label> <select id="yearFilter"></select> </div>
+        <button id="resetBtn">Reset filters</button>
+    </section>
+
+    <div id="scopeLine" class="scope-line"></div>
+
+    <section class="kpi-grid">
+        <div class="kpi card"><span>Total Sales</span><strong id="kpiSales">$0</strong></div>
+        <div class="kpi card"><span>Avg Sales / Week</span><strong id="kpiAvg">$0</strong></div>
+        <div class="kpi card"><span>Stores in View</span><strong id="kpiStores">0</strong></div>
+        <div class="kpi card"><span>Holiday-Week Sales Share</span><strong id="kpiHolidayShare">0%</strong></div>
+    </section>
+
+    <main class="dashboard-grid">
+        <section class="card chart-card wide">
+            <div class="chart-title">
+                <h2 id="lineTitle">Weekly Sales Trend</h2>
+                <p id="lineSubtitle">Total weekly sales across selected stores, over time.</p>
+                <span class="filter-badge" id="lineFilterBadge"></span>
+            </div> <svg id="lineChart"></svg>
+        </section>
+
+        <section class="card chart-card">
+            <div class="chart-title">
+                <h2>Holiday vs. Non-Holiday Weeks</h2>
+                <span class="filter-badge" id="donutFilterBadge"></span>
+            </div>
+            <svg id="donutChart"></svg>
+            <div id="perWeekLabel" class="subchart-label">Average sales per week (like-for-like)</div>
+            <svg id="holidayPerWeek"></svg>
+        </section>
+
+        <section class="card chart-card">
+            <div class="chart-title">
+                <h2 id="scatterTitle">Fuel Price vs. Weekly Sales</h2>
+                <p id="scatterSubtitle">Each point is one store-week. Color shows holiday weeks.</p>
+                <span class="filter-badge" id="scatterFilterBadge"></span>
+            </div> <svg id="scatterChart"></svg>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section class="card chart-card wide tall">
+            <div class="chart-title">
+                <h2 id="barTitle">Total Sales by Store</h2>
+                <p id="barSubtitle">Click a bar to filter the dashboard to that store.</p>
+                <span class="filter-badge" id="barFilterBadge"></span>
+            </div>
+            <div class="bar-controls">
+                <span class="ctrl-label">Filter bars:</span>
+                <div id="barModeToggle" class="seg">
+                    <button type="button" data-mode="exclude"
+                        title="Show all stores except the ones you add">Exclude</button>
+                    <button type="button" data-mode="include"
+                        title="Show only the stores you add">Include</button>
+                </div>
+                <div class="token-wrap">
+                    <div id="storeTokenField" class="token-field">
+                        <input id="storeSearch" type="text" inputmode="numeric" autocomplete="off"
+                            placeholder="Type a store number…" aria-label="Add store to bar filter" />
+                    </div>
+                    <div id="storeSuggest" class="suggest" hidden></div>
+                </div>
+                <button id="clearStoreSel" type="button" class="link-btn">Clear</button>
+                <span id="storeSelHint" class="ctrl-hint"></span>
+            </div>
+            <svg id="barChart"></svg>
+        </section>
+    </main>
+
+    <footer class="source-note">Source: Walmart Sales Forecast dataset (Kaggle, mikhail1681/walmart-sales) —
+        weekly sales by store, 2010–2012.</footer>
+
+    <div id="tooltip" class="tooltip"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
