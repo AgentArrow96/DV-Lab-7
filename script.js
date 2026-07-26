@@ -10,14 +10,11 @@ function formatCompactCurrency(value) {
   return "$" + value.toFixed(0);
 }
 
-// Walmart brand palette. One accent = baseline value, one highlight = the point
-// worth noticing. This mapping stays fixed across every chart: yellow always
-// means "holiday week" or "the store to look at" — never a decorative choice.
 const COLORS = {
-  accent: "#0071CE",   // True Blue
-  highlight: "#FFC220", // Spark Yellow
+  accent: "#0071CE",
+  highlight: "#FFC220",
   neutral: "#94a3b8",
-  selected: "#001E60"  // Bentonville Blue — the store the dashboard is drilled into
+  selected: "#001E60"
 };
 
 function holidayLabel(flag) {
@@ -34,15 +31,10 @@ const state = {
   store: "All",
   holiday: "All",
   year: "All",
-  // Bar-chart-only store filter (the global Store dropdown deliberately does not
-  // apply to the bar chart). barMode = "exclude" | "include"; barStores = the set
-  // of store numbers chosen. Empty set = no constraint = show all 45 bars.
   barMode: "exclude",
   barStores: new Set()
 };
 
-// Module-level handle to the parsed rows, so the bar-chart store controls can
-// redraw just the bar chart without threading `data` through every callback.
 let DATA = null;
 
 const tooltip = d3.select("#tooltip");
@@ -95,13 +87,10 @@ d3.csv("Walmart.csv").then(raw => {
   });
 });
 
-// All store numbers (1..45), sorted — the universe the typeahead draws from.
 let ALL_STORES = [];
-let suggestIndex = -1; // highlighted row in the suggestion overlay
+let suggestIndex = -1;
 
-// Build the Include/Exclude store controls for the bar chart: a mode toggle and a
-// compact typeahead. Type a store number → matching stores show as suggestions →
-// click/Enter adds it as a removable token. Only the chosen stores are ever shown.
+
 function buildBarStoreControls(data) {
   ALL_STORES = Array.from(new Set(data.map(d => d.store))).sort((a, b) => a - b);
 
@@ -123,7 +112,6 @@ function buildBarStoreControls(data) {
   search.on("input", renderSuggestions);
   search.on("focus", renderSuggestions);
   search.on("keydown", handleSearchKey);
-  // Delay so a click on a suggestion registers before the overlay hides.
   search.on("blur", () => setTimeout(hideSuggestions, 150));
 
   refreshBarStoreControls();
@@ -145,8 +133,6 @@ function removeStore(n) {
   drawBarChart(getBarData(DATA), DATA);
 }
 
-// Stores matching the current query (prefix match on the number) that aren't
-// already selected. "1" → 1, 10–19; "2" → 2, 20–29.
 function matchingStores() {
   const q = d3.select("#storeSearch").property("value").trim();
   return ALL_STORES.filter(s =>
@@ -196,8 +182,6 @@ function handleSearchKey(event) {
   }
 }
 
-// Render the selected-store tokens (before the input) and sync mode button +
-// hint text with the current barMode / barStores.
 function refreshBarStoreControls() {
   d3.selectAll("#barModeToggle button")
     .classed("active", function () { return this.dataset.mode === state.barMode; });
@@ -212,8 +196,6 @@ function refreshBarStoreControls() {
   d3.select("#storeSelHint").text(hint);
 }
 
-// Tokens sit inside the input field, before the search box. Color mirrors the
-// mode: blue in Include ("shown"), orange in Exclude ("hidden").
 function renderTokens() {
   const chosen = [...state.barStores].sort((a, b) => a - b);
   const field = d3.select("#storeTokenField");
@@ -229,14 +211,12 @@ function renderTokens() {
   merged.classed("exclude", state.barMode === "exclude");
   merged.select(".token-label").text(d => `Store ${d}`);
   merged.select(".x").on("click", (event, d) => removeStore(d));
-  // Keep DOM order: tokens first (ascending), input last.
   merged.order();
   input.raise();
 
   input.attr("placeholder", chosen.length ? "" : "Type a store number…");
 }
 
-// True if a store should appear as a bar, given the Include/Exclude selection.
 function storeVisible(store) {
   if (state.barStores.size === 0) return true;
   return state.barMode === "include"
@@ -274,7 +254,6 @@ function fillSelect(selector, items) {
     .text(d => d.label);
 }
 
-// Full filter set — drives the KPIs, line, donut, and scatter charts.
 function getFilteredData(data) {
   return data.filter(d => {
     const storeOk = state.store === "All" || d.store === +state.store;
@@ -284,10 +263,6 @@ function getFilteredData(data) {
   });
 }
 
-// Bar chart deliberately ignores the Store filter: its job is comparing
-// all 45 stores against each other, and it is itself the control that
-// sets the Store filter (via click), so it can never filter itself down
-// to a single bar.
 function getBarData(data) {
   return data.filter(d => {
     const holidayOk = state.holiday === "All" || String(d.holiday) === state.holiday;
@@ -308,13 +283,10 @@ function updateDashboard(data) {
   drawScatterChart(filtered);
 }
 
-// Short phrase naming the store currently in scope — reused across subtitles.
 function storeScopeText() {
   return state.store === "All" ? "all 45 stores" : `Store ${state.store}`;
 }
 
-// The "Viewing: …" summary that keeps the active store/year/week-type visible,
-// so a single-store view never leaves the user guessing what they're looking at.
 function updateScopeLine() {
   const store = state.store === "All" ? "All 45 stores" : `Store ${state.store}`;
   const year = state.year === "All" ? "All years" : state.year;
@@ -323,8 +295,6 @@ function updateScopeLine() {
   d3.select("#scopeLine").html(`Viewing: <strong>${store}</strong> · ${year} · ${wk}`);
 }
 
-// Active filters affecting a chart, as {type, label} items (empty when nothing
-// is set). type maps to the dropdown/state clearFilter needs to reset.
 function activeFilterItems(includeStore) {
   const items = [];
   if (includeStore && state.store !== "All") items.push({ type: "store", label: `Store ${state.store}` });
@@ -333,8 +303,6 @@ function activeFilterItems(includeStore) {
   return items;
 }
 
-// Resets a single filter back to "All", syncs its dropdown, and redraws —
-// the same effect as changing that dropdown back to "All" manually.
 function clearFilter(type) {
   if (type === "store") { state.store = "All"; d3.select("#storeFilter").property("value", "All"); }
   else if (type === "holiday") { state.holiday = "All"; d3.select("#holidayFilter").property("value", "All"); }
@@ -342,9 +310,6 @@ function clearFilter(type) {
   updateDashboard(DATA);
 }
 
-// Renders the filter badge as a row of removable chips — one per active filter —
-// so a filter can be cleared right at the chart instead of scrolling back to the
-// top filter bar. Hidden entirely when nothing is active.
 function renderFilterBadge(selector, items) {
   const el = d3.select(selector);
   if (items.length === 0) { el.style("display", "none").html(""); return; }
@@ -356,9 +321,6 @@ function renderFilterBadge(selector, items) {
     .on("click", (event, d) => clearFilter(d.type));
 }
 
-// Each chart carries a badge of the filters affecting it, so the active scope is
-// obvious even when a chart is scrolled away from the top filter bar. The bar
-// chart ignores the Store dropdown, so its badge omits Store.
 function updateFilterBadges() {
   const globalItems = activeFilterItems(true);
   renderFilterBadge("#lineFilterBadge", globalItems);
@@ -369,9 +331,6 @@ function updateFilterBadges() {
 
 function updateKPIs(data) {
   const totalSales = d3.sum(data, d => d.weeklySales);
-  // Weekly run-rate = total ÷ distinct calendar weeks in view. This is the
-  // average HEIGHT of the line chart below, so the KPI and that chart agree —
-  // unlike a per-store-week mean, which is a different (and easily misread) number.
   const weekCount = new Set(data.map(d => d.date.getTime())).size;
   const avgPerWeek = weekCount > 0 ? totalSales / weekCount : 0;
   const storesInView = new Set(data.map(d => d.store)).size;
@@ -384,7 +343,6 @@ function updateKPIs(data) {
   d3.select("#kpiHolidayShare").text(formatPercent(holidayShare));
 }
 
-// Task 1: Sales Trend Line Chart
 function drawLineChart(data) {
   const svg = d3.select("#lineChart");
   svg.selectAll("*").remove();
@@ -452,7 +410,6 @@ function drawLineChart(data) {
   );
 }
 
-// Task 2: Store-wise Sales Bar Chart
 function drawBarChart(barData, allData) {
   const svg = d3.select("#barChart");
   svg.selectAll("*").remove();
@@ -509,10 +466,6 @@ function drawBarChart(barData, allData) {
     .attr("x", 0)
     .attr("width", d => x(d.sales))
     .attr("rx", 3)
-    // Three distinct fills, in priority order: selected store (the one the rest
-    // of the dashboard is drilled into) wins with a solid accent-blue fill so it
-    // is unmistakable; otherwise the top performer is orange; everything else is
-    // neutral gray. Selection is a full color change, not a thin outline.
     .attr("fill", d => {
       if (selectedStore === d.store) return COLORS.selected;
       if (d.store === topStore) return COLORS.highlight;
@@ -536,7 +489,6 @@ function drawBarChart(barData, allData) {
   );
 }
 
-// Task 3: Holiday vs Non-Holiday Sales Donut Chart
 function drawDonutChart(data, allData) {
   const svg = d3.select("#donutChart");
   svg.selectAll("*").remove();
@@ -581,8 +533,6 @@ function drawDonutChart(data, allData) {
     .attr("class", "slice-label")
     .attr("transform", d => `translate(${labelArc.centroid(d)})`)
     .attr("text-anchor", "middle")
-    // White reads fine on the blue slice, but is unreadable on Spark Yellow —
-    // the holiday slice gets dark navy text instead.
     .attr("fill", d => (d.data.flag === 1 ? "#041E42" : "white"))
     .attr("font-size", 12)
     .attr("font-weight", "bold")
@@ -597,14 +547,9 @@ function drawDonutChart(data, allData) {
 
   addLegend(svg, 16, 16, grouped.map(d => ({ label: holidayLabel(d.flag), color: holidayColor(d.flag) })));
 
-  // The donut above compares TOTALS, which isn't like-to-like: holiday weeks are
-  // far rarer (≈10 vs ≈133 per store), so the split mostly reflects week counts.
-  // These bars give the fair per-week comparison, where holiday actually wins.
   drawHolidayPerWeek(grouped);
 }
 
-// Like-for-like companion to the donut: average sales per week by week type.
-// Same colors as the donut (blue non-holiday / orange holiday) so meaning carries.
 function drawHolidayPerWeek(grouped) {
   const svg = d3.select("#holidayPerWeek");
   svg.selectAll("*").remove();
@@ -614,7 +559,6 @@ function drawHolidayPerWeek(grouped) {
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
-  // Non-Holiday first, then Holiday — whichever are present in the current filter.
   const rows = [grouped.find(d => d.flag === 0), grouped.find(d => d.flag === 1)]
     .filter(Boolean)
     .map(d => ({ flag: d.flag, label: holidayLabel(d.flag), value: d.avgPerWeek, weeks: d.weeks }));
@@ -665,7 +609,6 @@ function drawHolidayPerWeek(grouped) {
     .text(d => formatCompactCurrency(d.value) + (d.flag === 1 ? upliftText : ""));
 }
 
-// Task 4: Fuel Price vs Weekly Sales Scatter Plot
 function drawScatterChart(data) {
   const svg = d3.select("#scatterChart");
   svg.selectAll("*").remove();
@@ -701,10 +644,6 @@ function drawScatterChart(data) {
     .attr("text-anchor", "middle").attr("fill", "#6b7280").attr("font-size", 12)
     .text("Weekly Sales");
 
-  // Draw non-holiday (blue) points first, holiday (yellow) points last so the
-  // rarer, harder-to-see yellow marks aren't buried under the far more numerous
-  // blue ones — yellow also gets a thin dark outline and higher opacity, since a
-  // pale yellow dot at low opacity nearly vanishes on a white background.
   const sorted = [...sample].sort((a, b) => a.holiday - b.holiday);
   g.selectAll("circle").data(sorted).join("circle")
     .attr("cx", d => x(d.fuelPrice))

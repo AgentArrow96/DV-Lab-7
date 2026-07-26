@@ -5,20 +5,11 @@
     --muted: #6b7280;
     --border: #e5e7eb;
 
-    /* Walmart brand palette. Two-color accent system, used consistently across
-       every chart: accent = baseline / regular value, highlight = the point
-       worth noticing. Spark Yellow is low-contrast on white, so anywhere it
-       carries text or a thin mark, a dark ink color is used instead of white. */
     --accent: #0071CE;
-    /* True Blue */
     --accent-soft: #A9DDF3;
-    /* Sky Blue */
     --highlight: #FFC220;
-    /* Spark Yellow */
     --highlight-ink: #946A00;
-    /* dark gold text/marks paired with yellow */
     --navy: #001E60;
-    /* Bentonville Blue */
     --neutral: #94a3b8;
     --neutral-soft: #cbd5e1;
 }
@@ -148,8 +139,6 @@ button {
     min-height: 450px;
 }
 
-/* Full-width labelled rule marking where the top filters stop applying and the
-   independently-filtered store comparison begins. */
 .section-divider {
     grid-column: 1 / -1;
     height: 1px;
@@ -236,9 +225,6 @@ button {
     color: var(--text);
 }
 
-/* Token color mirrors the mode: blue in Include ("shown"), yellow in Exclude
-   ("hidden") — so the selection reads correctly without checking the toggle.
-   Yellow needs dark text/× to stay legible (white-on-yellow fails contrast). */
 .token {
     display: inline-flex;
     align-items: center;
@@ -351,8 +337,6 @@ svg {
     font-size: 11px;
 }
 
-/* Decluttered axes: no gridlines, no domain spine / plot border — just light
-   tick marks and labels. */
 .axis line {
     stroke: #e5e7eb;
 }
@@ -361,9 +345,6 @@ svg {
     display: none;
 }
 
-/* A row of removable filter chips shown on each chart, so the active scope
-   stays visible without scrolling back to the top filter bar. Hidden (via
-   JS display:none) when no filters are active. */
 .filter-badge {
     display: none;
     align-items: center;
@@ -412,10 +393,13 @@ svg {
 }
 
 .annotation.highlight {
-    /* Spark Yellow text on white fails contrast — use the dark-gold ink instead
-       so the peak callout stays legible while keeping the warm association. */
     fill: var(--highlight-ink);
     font-weight: bold;
+    font-size: 13px;
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
 }
 
 .tooltip {
